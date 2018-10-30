@@ -1,0 +1,18 @@
+fun writeFile (filename, content) =
+    let val file = TextIO.openOut(filename)
+        val _ = TextIO.output(file, content)
+    in TextIO.closeOut(file)
+    end
+    
+fun readFile(filename) =
+    let val file = TextIO.openIn filename
+        val content = TextIO.inputAll file
+        val _ = TextIO.closeIn file
+    in String.tokens (fn c => c = #"\n") content
+    end
+  
+val fragments = readFile("C:/Users/DELL/Desktop/Eduardo/Engenharia de Software/2018 02/LProg/Lprog-T4/fragments.txt") 
+ 
+
+
+
