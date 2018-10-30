@@ -1,8 +1,8 @@
-﻿val palavra = "Niagara"
+val palavra = "Niagara"
 
-val toChar = fn x => String.explode x
+val toCharList = fn x => String.explode x
 
-val toString = fn x => Char.toString x
+val toStringList = fn x => Char.toString x
 
 val frags = ["Ni", "a", "g", "r"]
 
@@ -16,4 +16,15 @@ fun parse(_,[]) = false
   		
 val tokens = List.map toString verificar
    	     	 
-val tok = String.substring(List.hd(tokens),0,1)
+val tok = fn (t,n) => List.nth(t,n)
+
+val a = tok (tokens,0)^tok (tokens,1)
+
+
+* 1 - Transformar palavra em lista de char -> val toCharList *
+* 2 - Converter toCharList em lista de String -> val toStringList *
+* 3 - Tentar parse(toStringList[0],frags) 
+					  T-> parser(toStringList[1],frags)
+					  F-> parse(toStringList[0]^toStringList[1],frags) *
+
+* 4 - Iterar passo 3 até parse(toStringList[n] ou passo 3 == false
