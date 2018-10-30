@@ -1,0 +1,19 @@
+﻿val palavra = "Niagara"
+
+val toChar = fn x => String.explode x
+
+val toString = fn x => Char.toString x
+
+val frags = ["Ni", "a", "g", "r"]
+
+val verificar = toChar palavra
+
+fun parse(_,[]) = false
+  | parse(texto,h::t) =
+  	if texto = h
+  		then true
+  		else parse(texto,t)
+  		
+val tokens = List.map toString verificar
+   	     	 
+val tok = String.substring(List.hd(tokens),0,1)
