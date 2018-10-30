@@ -1,3 +1,7 @@
+import structure Regex from "x-alice:/lib/regex/Regex"
+import signature REGEX from "x-alice:/lib/regex/REGEX-sig"
+
+
 fun writeFile (filename, content) =
     let val file = TextIO.openOut(filename)
         val _ = TextIO.output(file, content)
@@ -12,7 +16,13 @@ fun readFile(filename) =
     end
   
 val fragments = readFile("C:/Users/DELL/Desktop/Eduardo/Engenharia de Software/2018 02/LProg/Lprog-T4/fragments.txt") 
- 
 
+fun parse(_,[]) = true
+  | parse(texto,h::t) =
+  	if texto = h
+  		then parse(texto,t)
+  		else false
+
+parse ("INTER",["gremio"]);
 
 
