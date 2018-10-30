@@ -1,0 +1,11 @@
+
+val list = ["a", "e", "i", "o", "u"]
+
+val letters = ["gh", "e", "j", "im", "a", "i", "k"]
+
+val _ = List.filter parse list letters   
+
+
+
+
+  
