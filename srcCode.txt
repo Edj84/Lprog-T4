@@ -1,8 +1,15 @@
-val lista = ["a","h", "am", "me","i","o","u"];
-
-val words = ["haha", "aaaa", "klaada", "amai", "oea", "iiumea"];
+fun readFile(filename) =
+    let val file = TextIO.openIn filename
+        val content = TextIO.inputAll file
+        val _ = TextIO.closeIn file
+    in String.tokens (fn c => c = #"\n") content
+    end
+    
+val fragments = readFile "fragments.txt"    
 
 val tokens = fn x => List.map Char.toString (String.explode x)
+
+val words = ["HeONiCu", "aaaa", "klaada", "amai", "oea", "iiumea"];
 
 val words = List.map tokens words;
 
@@ -12,27 +19,29 @@ fun compareFrag(_,[]) = false
   		then true
   		else compareFrag(tok,t)
   		
-fun parseS (tokens,n) = compareFrag(List.nth(tokens,n),lista)			            
+fun parseS (tokens,n) = compareFrag(List.nth(tokens,n),fragments)			            
 			       
-fun parseDF (tokens,n,t) = if t = 2 
+fun parseDF (tokens,n,t) = if (t = 2 orelse n >= List.length(tokens)-1)
 				then false
-				else compareFrag(List.nth(tokens,n)^List.nth(tokens,n+1),lista)
+				else compareFrag(List.nth(tokens,n)^List.nth(tokens,n+1),fragments)
 
-fun parseDB (tokens,n,t) = if t = 2 
+fun parseDB (tokens,n,t) = if (t = 2 orelse n = 0)
 				then false
-				else compareFrag(List.nth(tokens,n-1)^List.nth(tokens,n),lista)			            
+				else compareFrag(List.nth(tokens,n-1)^List.nth(tokens,n),fragments)			            
 
-fun verify (pal,n,t) = if n = List.length(pal) 
-			then pal
-			else if parseS(pal,n)
-				then verify (pal,n+1,1)
-				else if parseDF(pal,n,t)
-					then verify( pal,n+2,2)
-					else if parseDB(pal,n,t)
-						then verify (pal,n+1,2)
-						else []
+fun verify (w,n,t) = if n >= List.length(w) 
+			then String.concat(w)
+			else if parseS(w,n)
+				then verify(w,n+1,1)
+				else if parseDF(w,n,t)
+					then verify(w,n+2,2)
+					else if parseDB(w,n,t)
+						then verify(w,n+1,2)
+						else String.concat([])
 
-fun run (w) = verify(w,0,0)
+fun writeFile(x,filename) = 
+	(let val file = TextIO.openOut(filename)
+         val _ = TextIO.output(file,x);
+    in TextIO.closeOut(file);
+    end)
 
-	
-							     	 
