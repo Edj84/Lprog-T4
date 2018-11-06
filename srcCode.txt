@@ -1,51 +1,97 @@
+(* cria funcoes de ler arquivos e gravar *)
 fun readFile(filename) =
     let val file = TextIO.openIn filename
         val content = TextIO.inputAll file
         val _ = TextIO.closeIn file
     in String.tokens (fn c => c = #"\n") content
-    end
-    
-val fragments = readFile "fragments.txt"    
+    end;
 
-val tokens = fn x => List.map Char.toString (String.explode x)
-
-val words = ["HeONiCu", "aaaa", "klaada", "amai", "oea", "iiumea"];
-
-val words = List.map tokens words;
-
-fun compareFrag(_,[]) = false
-  | compareFrag(tok,h::t) =
-  	if tok = h
-  		then true
-  		else compareFrag(tok,t)
-  		
-fun parseS (tokens,n) = compareFrag(List.nth(tokens,n),fragments)			            
-			       
-fun parseDF (tokens,n,t) = if n >= List.length(tokens)-1
-				then false
-				else compareFrag(List.nth(tokens,n)^List.nth(tokens,n+1),fragments)
-
-fun parseDB (tokens,n,t) = if (t = 2 orelse n = 0)
-				then false
-				else compareFrag(List.nth(tokens,n-1)^List.nth(tokens,n),fragments)			            
-
-fun verify (w,n,t) = if n >= List.length(w) 
-			then String.concat(w)
-			else if parseS(w,n)
-				then verify(w,n+1,1)
-				else if parseDF(w,n,t)
-					then verify(w,n+2,2)
-					else if parseDB(w,n,t)
-						then verify(w,n+1,2)
-						else String.concat([])
-
-val crap = [["H", "e", "O", "N", "i", "C", "u"], ["a", "a", "a", "a"],
-    ["k", "l", "a", "a", "d", "a"], ["a", "m", "a", "i"], ["o", "e", "a"],
-    ["i", "i", "u", "m", "e", "a"]]
-
-fun writeFile(text,filename) = 
+fun writeFile(x,filename) = 
 	(let val file = TextIO.openOut(filename)
-         val _ = TextIO.output(file,text);
+         val _ = TextIO.output(file,x);
     in TextIO.closeOut(file);
-    end)
+    end);
 
+fun quit(outFile: string, list: string list) =
+  let
+    val outStream = TextIO.openOut outFile
+    fun out(xs : string list) =  
+          case xs of
+              [] => (TextIO.closeOut outStream)
+            | x::xs' => (TextIO.output(outStream, x ^ "\r\n"); out(xs'))
+  in
+    out(list)
+  end;
+
+
+(*1 cria variavel com a lista de palavras *)
+val palavras = readFile("words.txt");
+
+(*2 cria variavel com a lista de fragmentos (eh pego o path, pois sao feitas copias da lista algumas vezes durante a execucao*)
+val fragmentosPATH = "fragments.txt";
+
+val fragmentos = readFile(fragmentosPATH);
+
+(* passar tudo para upperCase e remover caracteres especiais*)
+val allCaps = String.map Char.toUpper;
+
+fun correct (x::xs, []) = x::xs | correct (xs, y::ys) = correct(allCaps(y)::xs, ys);
+
+val palavras = correct([],palavras);
+val fragmentos = correct([],fragmentos);
+
+(* 3 organizar lista de fragmentos em ordem decrescente usando quick sort *)
+
+fun quicksort [] = []
+  | quicksort (x::xs) =
+    let 
+        val (left, right) = List.partition (fn y => size y> size x) xs
+    in
+        quicksort left @ [x] @ quicksort right
+    end;
+
+(* 8 remove o fragmento de dentro da palavra*)
+
+fun removeLetters (x,y,n) = 
+if size y + n > size x 
+then "erro" 
+else if size y + n = size x
+then String.substring(x, 0, size x - size y)
+else if String.substring(x, n, size y) = y andalso n=0
+then String.substring(x, size y, size x- size y)
+else if String.substring(x, n, size y) = y andalso n>0
+then String.substring(x, 0, n) ^ String.substring(x, n+size y, size x-(n+size y))
+else removeLetters(x,y,n+1);
+
+(* 7 se a palavra conter o fragmento *)
+
+fun testFragments (word, fragment) = 
+if String.isSubstring fragment word
+then testFragments(removeLetters(word, fragment, 0), fragment)
+else word;
+
+(* 6 percorrer lista de fragmentos *)
+
+fun runFragments(word, []) = "saiu"
+   |runFragments(word, h::t) =
+	if size word = 0 orelse word = "" orelse word = " " then word 
+	else runFragments(testFragments(word, h), t);
+
+(* 5 enquanto o tamanho da palavra nao zerar (junto itens 10, 11, 12, 13 e 14)*)
+
+fun wordValidation(backUpWord, word, count, limit, h::t, fragmentosCopy) = 
+if word= "" then backUpWord::h::t
+else if length fragmentosCopy = 0 then h::t
+else if count = limit then wordValidation(backUpWord, backUpWord, count-count, limit, h::t, List.drop (fragmentosCopy,1))
+else wordValidation(backUpWord, runFragments(word, quicksort(fragmentosCopy)), count+1, limit, h::t, fragmentosCopy);
+
+(* 4 percorrer lista de palavras *)
+val tamanhoFragmentos = length fragmentos;
+
+fun runWords([],y::ys) = y::ys | runWords(x::xs, y::ys) =  runWords(xs, wordValidation(x,x,0, tamanhoFragmentos, y::ys, correct([],readFile(fragmentosPATH))));
+
+(* 9 para quando o tamanho da lista de palavras palavra zerar*)
+
+val t4 = runWords(palavras,["FIM"]);
+
+quit("verified.txt", t4);
