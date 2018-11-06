@@ -15,13 +15,13 @@ val words = List.map tokens words;
 
 fun compareFrag(_,[]) = false
   | compareFrag(tok,h::t) =
-  	if tok = h
+  	if tok = h
   		then true
   		else compareFrag(tok,t)
   		
 fun parseS (tokens,n) = compareFrag(List.nth(tokens,n),fragments)			            
 			       
-fun parseDF (tokens,n,t) = if (t = 2 orelse n >= List.length(tokens)-1)
+fun parseDF (tokens,n,t) = if n >= List.length(tokens)-1
 				then false
 				else compareFrag(List.nth(tokens,n)^List.nth(tokens,n+1),fragments)
 
@@ -29,7 +29,7 @@ fun parseDB (tokens,n,t) = if (t = 2 orelse n = 0)
 				then false
 				else compareFrag(List.nth(tokens,n-1)^List.nth(tokens,n),fragments)			            
 
-fun verify (w,n,t) = if n >= List.length(w) 
+fun verify (w,n,t) = if n >= List.length(w) 
 			then String.concat(w)
 			else if parseS(w,n)
 				then verify(w,n+1,1)
@@ -39,9 +39,13 @@ fun verify (w,n,t) = if n >= List.length(w)
 						then verify(w,n+1,2)
 						else String.concat([])
 
-fun writeFile(x,filename) = 
+val crap = [["H", "e", "O", "N", "i", "C", "u"], ["a", "a", "a", "a"],
+    ["k", "l", "a", "a", "d", "a"], ["a", "m", "a", "i"], ["o", "e", "a"],
+    ["i", "i", "u", "m", "e", "a"]]
+
+fun writeFile(text,filename) = 
 	(let val file = TextIO.openOut(filename)
-         val _ = TextIO.output(file,x);
+         val _ = TextIO.output(file,text);
     in TextIO.closeOut(file);
     end)
 
