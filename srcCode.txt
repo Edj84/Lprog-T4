@@ -1,18 +1,95 @@
-fun writeFile (filename, content) =
-    let val file = TextIO.openOut(filename)
-        val _ = TextIO.output(file, content)
-    in TextIO.closeOut(file)
-    end
-    
+(* cria funcao de ler arquivos e gravar *)
 fun readFile(filename) =
     let val file = TextIO.openIn filename
         val content = TextIO.inputAll file
         val _ = TextIO.closeIn file
     in String.tokens (fn c => c = #"\n") content
-    end
-  
-val fragments = readFile("C:/Users/DELL/Desktop/Eduardo/Engenharia de Software/2018 02/LProg/Lprog-T4/fragments.txt") 
- 
+    end;
+
+fun writeFile(x,filename) = 
+	(let val file = TextIO.openOut(filename)
+         val _ = TextIO.output(file,x);
+    in TextIO.closeOut(file);
+    end);
+
+(*1 cria variavel com a lista de palavras *)
+val palavras = readFile("C:/Projects/Lprog-T4/words.txt");
+
+(*2 cria variavel com a lista de fragmentos*)
+val fragmentos = readFile("C:/Projects/Lprog-T4/fragments.txt");
+
+(* 3 organizar lista de fragmentos em ordem decrescente usando quick sort *)
+
+fun quicksort [] = []
+  | quicksort (x::xs) =
+    let 
+        val (left, right) = List.partition (fn y => size y> size x) xs
+    in
+        quicksort left @ [x] @ quicksort right
+    end;
+
+( * passar tudo para lower case e remover caracteres especiais*)
+( *??????????????*)
+
+(* 8 remove o fragmento de dentro da palavra*)
+
+fun removeLetters (x,y,n) = 
+if size y + n > size x 
+then "erro" 
+else if size y + n = size x
+then String.substring(x, 0, size x - size y)
+else if String.substring(x, n, size y) = y andalso n=0
+then String.substring(x, size y, size x- size y)
+else if String.substring(x, n, size y) = y andalso n>0
+then String.substring(x, 0, n) ^ String.substring(x, n+size y, size x-(n+size y))
+else removeLetters(x,y,n+1);
+
+(* 7 se a palavra conter o fragmento *)
+
+fun testFragments (word, fragment) = 
+if String.isSubstring fragment word
+then testFragments(removeLetters(word, fragment, 0), fragment)
+else word;
+
+(* 6 percorrer lista de fragmentos *)
+
+fun runFragments(word, []) = "saiu"
+   |runFragments(word, h::t) =
+	if size word = 0 orelse word = "" orelse word = " " then word 
+	else runFragments(testFragments(word, h), t);
+
+(* 5 enquanto o tamanho da palavra nao zerar *)
+
+fun wordValidation(backUpWord, word, count, limit, h::t) = 
+if word= "" then backUpWord::h::t
+else if count = limit then h::t
+else wordValidation(backUpWord, runFragments(word, quicksort(fragmentos)), count+1, limit, h::t);
 
 
+(* 4 percorrer lista de palavras *)
+
+fun runWords([],y::ys) = y::ys | runWords(x::xs, y::ys) =  runWords(xs, wordValidation(x,x,0, length fragmentos, y::ys));
+
+(* 9 para quando o tamanho da lista de palavras palavra zerar*)
+fun quit(outFile: string, list: string list) =
+  let
+    val outStream = TextIO.openOut outFile
+    fun out(xs : string list) =  
+          case xs of
+              [] => (TextIO.closeOut outStream)
+            | x::xs' => (TextIO.output(outStream, x ^ "\r\n"); out(xs'))
+  in
+    out(list)
+  end;
+
+val t4 = runWords(palavras,["FIM"]);
+
+quit("C:/Projects/Lprog-T4/verified.txt", t4);
+
+
+(* 10 se nao encontrar de primeira*)
+(* 11 se for a primeira vez que percorre, remove a primeira palavra e salva pra adicionar depois*)
+(* 12 se for a ultima, para e escreve como verificada*)
+(* 13 em qualquer outro caso, adiciona a ultima palavra removida e remove outra a nova*)
+(* 14 zerar tudo e recomeçar*)
 
