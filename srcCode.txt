@@ -24,10 +24,10 @@ fun quit(outFile: string, list: string list) =
   end;
 
 
-(*1 cria variavel com a lista de palavras *)
+(*1 lista de palavras *)
 val palavras = readFile("words.txt");
 
-(*2 cria variavel com a lista de fragmentos (eh pego o path, pois sao feitas copias da lista algumas vezes durante a execucao*)
+(*2 lista de fragmentos (usa o path, pois sao feitas copias da lista algumas vezes durante a execucao*)
 val fragmentosPATH = "fragments.txt";
 
 val fragmentos = readFile(fragmentosPATH);
@@ -38,6 +38,7 @@ val allCaps = String.map Char.toUpper;
 fun correct (x::xs, []) = x::xs | correct (xs, y::ys) = correct(allCaps(y)::xs, ys);
 
 val palavras = correct([],palavras);
+
 val fragmentos = correct([],fragmentos);
 
 (* 3 organizar lista de fragmentos em ordem decrescente usando quick sort *)
@@ -53,42 +54,46 @@ fun quicksort [] = []
 (* 8 remove o fragmento de dentro da palavra*)
 
 fun removeLetters (x,y,n) = 
-if size y + n > size x 
-then "erro" 
-else if size y + n = size x
-then String.substring(x, 0, size x - size y)
-else if String.substring(x, n, size y) = y andalso n=0
-then String.substring(x, size y, size x- size y)
-else if String.substring(x, n, size y) = y andalso n>0
-then String.substring(x, 0, n) ^ String.substring(x, n+size y, size x-(n+size y))
-else removeLetters(x,y,n+1);
+	if size y + n > size x 
+		then "erro" 
+		else if size y + n = size x
+			then String.substring(x, 0, size x - size y)
+			else if String.substring(x, n, size y) = y andalso n=0
+				then String.substring(x, size y, size x- size y)
+				else if String.substring(x, n, size y) = y andalso n>0
+					then String.substring(x, 0, n) ^ String.substring(x, n+size y, size x-(n+size y))
+					else removeLetters(x,y,n+1);
 
-(* 7 se a palavra conter o fragmento *)
+(* 7 se a palavra contiver o fragmento *)
 
 fun testFragments (word, fragment) = 
-if String.isSubstring fragment word
-then testFragments(removeLetters(word, fragment, 0), fragment)
-else word;
+	if String.isSubstring fragment word
+		then testFragments(removeLetters(word, fragment, 0), fragment)
+		else word;
 
 (* 6 percorrer lista de fragmentos *)
 
 fun runFragments(word, []) = "saiu"
    |runFragments(word, h::t) =
-	if size word = 0 orelse word = "" orelse word = " " then word 
-	else runFragments(testFragments(word, h), t);
+	if size word = 0 orelse word = "" orelse word = " " 
+		then word 
+		else runFragments(testFragments(word, h), t);
 
 (* 5 enquanto o tamanho da palavra nao zerar (junto itens 10, 11, 12, 13 e 14)*)
 
 fun wordValidation(backUpWord, word, count, limit, h::t, fragmentosCopy) = 
-if word= "" then backUpWord::h::t
-else if length fragmentosCopy = 0 then h::t
-else if count = limit then wordValidation(backUpWord, backUpWord, count-count, limit, h::t, List.drop (fragmentosCopy,1))
-else wordValidation(backUpWord, runFragments(word, quicksort(fragmentosCopy)), count+1, limit, h::t, fragmentosCopy);
+	if word = "" then backUpWord::h::t
+		else if length fragmentosCopy = 0 
+			then h::t
+			else if count = limit 
+			then wordValidation(backUpWord, backUpWord, count-count, limit, h::t, List.drop (fragmentosCopy,1))
+			else wordValidation(backUpWord, runFragments(word, quicksort(fragmentosCopy)), count+1, limit, h::t, fragmentosCopy);
 
 (* 4 percorrer lista de palavras *)
 val tamanhoFragmentos = length fragmentos;
 
-fun runWords([],y::ys) = y::ys | runWords(x::xs, y::ys) =  runWords(xs, wordValidation(x,x,0, tamanhoFragmentos, y::ys, correct([],readFile(fragmentosPATH))));
+fun runWords([],y::ys) = y::ys 
+  | runWords(x::xs, y::ys) =  runWords(xs, wordValidation(x,x,0, tamanhoFragmentos, y::ys, correct([],readFile(fragmentosPATH))));
 
 (* 9 para quando o tamanho da lista de palavras palavra zerar*)
 
