@@ -95,7 +95,3 @@ fun runWords([],y::ys) = y::ys | runWords(x::xs, y::ys) =  runWords(xs, wordVali
 val t4 = runWords(palavras,["FIM"]);
 
 quit("verified.txt", t4);
-
-
-
-
