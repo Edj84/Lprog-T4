@@ -25,14 +25,14 @@ fun quit(outFile: string, list: string list) =
 
 
 (*1 cria variavel com a lista de palavras *)
-val palavras = readFile("C:/Projects/Lprog-T4/words.txt");
+val palavras = readFile("words.txt");
 
 (*2 cria variavel com a lista de fragmentos (eh pego o path, pois sao feitas copias da lista algumas vezes durante a execucao*)
-val fragmentosPATH = "C:/Projects/Lprog-T4/fragments.txt";
+val fragmentosPATH = "fragments.txt";
 
 val fragmentos = readFile(fragmentosPATH);
 
-( * passar tudo para upperCase e remover caracteres especiais*)
+(* passar tudo para upperCase e remover caracteres especiais*)
 val allCaps = String.map Char.toUpper;
 
 fun correct (x::xs, []) = x::xs | correct (xs, y::ys) = correct(allCaps(y)::xs, ys);
@@ -94,7 +94,7 @@ fun runWords([],y::ys) = y::ys | runWords(x::xs, y::ys) =  runWords(xs, wordVali
 
 val t4 = runWords(palavras,["FIM"]);
 
-quit("C:/Projects/Lprog-T4/verified.txt", t4);
+quit("verified.txt", t4);
 
 
 
